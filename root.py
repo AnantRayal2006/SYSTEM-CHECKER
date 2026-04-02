@@ -46,7 +46,7 @@ def windows_security_scan():
         findings.append(("Driver signature enforcement active", "safe"))
 
     defender = run_cmd("powershell Get-MpComputerStatus")
-    if "AMServiceEnabled : True" in defender:
+    if "AMServiceEnabled" in defender and "True" in defender:
         findings.append(("Windows Defender active", "safe"))
     else:
         findings.append(("Windows Defender disabled", "danger"))
