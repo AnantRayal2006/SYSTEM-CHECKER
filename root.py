@@ -4,22 +4,18 @@ import subprocess
 import time
 import threading
 import math
-
-# ─── PALETTE ────────────────────────────────────────────────────────────────
-BG          = "#0d1117"   # deep night
-BG_CARD     = "#161b22"   # card surface
-BG_ITEM     = "#1c2333"   # list row bg
-BORDER      = "#21262d"   # subtle border
-
-TEAL        = "#79c0ff"   # calm blue-teal (headlines)
-TEAL_DIM    = "#388bfd"   # accent
-GREEN       = "#56d364"   # safe
-YELLOW      = "#e3b341"   # warn
-RED         = "#f85149"   # danger
-WHITE       = "#e6edf3"   # body text
-MUTED       = "#484f58"   # subdued text
-MUTED2      = "#6e7681"   # labels
-
+BG          = "#0d1117"   
+BG_CARD     = "#161b22"   
+BG_ITEM     = "#1c2333"   
+BORDER      = "#21262d"  
+TEAL        = "#79c0ff"  
+TEAL_DIM    = "#388bfd"  
+GREEN       = "#56d364"  
+YELLOW      = "#e3b341"  
+RED         = "#f85149"  
+WHITE       = "#e6edf3"  
+MUTED       = "#484f58"   
+MUTED2      = "#6e7681"   
 FONT_TITLE  = ("Segoe UI", 22, "bold")
 FONT_SUB    = ("Segoe UI", 10)
 FONT_MONO   = ("Consolas", 10)
@@ -27,16 +23,12 @@ FONT_BADGE  = ("Segoe UI", 9, "bold")
 FONT_BTN    = ("Segoe UI", 11, "bold")
 FONT_SCORE  = ("Segoe UI", 28, "bold")
 
-
-# ─── REAL COMMAND RUNNER ────────────────────────────────────────────────────
 def run_cmd(cmd):
     try:
         return subprocess.check_output(cmd, shell=True, stderr=subprocess.DEVNULL).decode(errors="ignore")
     except:
         return ""
 
-
-# ─── REAL WINDOWS SCAN ──────────────────────────────────────────────────────
 def windows_security_scan():
     findings = []
 
@@ -79,8 +71,6 @@ def windows_security_scan():
 
     return findings
 
-
-# ─── ANIMATED PROGRESS RING ─────────────────────────────────────────────────
 class RingCanvas(tk.Canvas):
     """A smooth animated arc that spins during scanning."""
 
@@ -97,11 +87,11 @@ class RingCanvas(tk.Canvas):
         self.delete("all")
         pad = 8
         s = self.size
-        # track
+        
         self.create_arc(pad, pad, s - pad, s - pad,
                         start=0, extent=359,
                         style="arc", outline=BG_ITEM, width=6)
-        # arc
+        
         self.create_arc(pad, pad, s - pad, s - pad,
                         start=start, extent=extent,
                         style="arc", outline=color, width=6)
@@ -129,8 +119,6 @@ class RingCanvas(tk.Canvas):
             self.after_cancel(self._job)
         self._draw_ring(90, MUTED, extent=359)
 
-
-# ─── MAIN APPLICATION ────────────────────────────────────────────────────────
 class App:
     def __init__(self, root):
         self.root = root
@@ -141,10 +129,7 @@ class App:
 
         self.results = []
         self._build_ui()
-
-    # ── UI construction ──────────────────────────────────────────────────────
     def _build_ui(self):
-        # ── Header bar ──────────────────────────────────────────────────────
         header = tk.Frame(self.root, bg=BG_CARD, pady=0)
         header.pack(fill="x")
         _sep_h(header)
@@ -162,11 +147,9 @@ class App:
 
         _sep_h(header, color=BORDER)
 
-        # ── Centre content ───────────────────────────────────────────────────
         body = tk.Frame(self.root, bg=BG)
         body.pack(fill="both", expand=True, padx=24, pady=18)
 
-        # Left column – ring + button + score
         left = tk.Frame(body, bg=BG, width=160)
         left.pack(side="left", fill="y", padx=(0, 20))
         left.pack_propagate(False)
@@ -182,7 +165,6 @@ class App:
 
         tk.Frame(left, bg=BG, height=20).pack()
 
-        # Score area
         score_card = tk.Frame(left, bg=BG_CARD, padx=14, pady=12)
         score_card.pack(fill="x")
         _rounded_border(score_card)
@@ -196,7 +178,6 @@ class App:
                                     fg=MUTED, bg=BG_CARD, font=("Segoe UI", 10, "bold"))
         self.verdict_lbl.pack()
 
-        # Right column – results list
         right = tk.Frame(body, bg=BG_CARD, padx=0, pady=0)
         right.pack(side="left", fill="both", expand=True)
 
@@ -210,38 +191,29 @@ class App:
 
         _sep_h(right, color=BORDER)
 
-        # Scrollable frame for rows
         self.list_frame = tk.Frame(right, bg=BG_CARD)
         self.list_frame.pack(fill="both", expand=True, padx=0, pady=0)
 
-        # ── Footer ───────────────────────────────────────────────────────────
         foot = tk.Frame(self.root, bg=BG_CARD, pady=0)
         foot.pack(fill="x", side="bottom")
         _sep_h(foot, color=BORDER)
         tk.Label(foot, text="Windows Security Analyzer  ·  v4",
                  fg=MUTED, bg=BG_CARD, font=("Segoe UI", 8)).pack(pady=6)
 
-    # ── Scan orchestration ───────────────────────────────────────────────────
     def start_scan(self):
-        # Clear previous
         for w in self.list_frame.winfo_children():
             w.destroy()
-
         self.score_lbl.config(text="—", fg=MUTED)
         self.verdict_lbl.config(text="", fg=MUTED)
         self.count_lbl.config(text="")
         self.badge.config(text="SCANNING", fg=TEAL)
         self.btn.set_state("disabled")
         self.ring.spin()
-
         threading.Thread(target=self._scan_worker, daemon=True).start()
-
     def _scan_worker(self):
         self.results = windows_security_scan()
-
         dangers = 0
         warns = 0
-
         for idx, (label, result) in enumerate(self.results):
             time.sleep(0.45)
 
@@ -289,8 +261,6 @@ class App:
                         fg=tag_colors[tag], bg=inner["bg"],
                         font=("Segoe UI", 8, "bold"))
         chip.pack(side="right")
-
-        # Fade-in via alpha simulation with slight bg shift
         self.count_lbl.config(text=f"{self.list_frame.winfo_children().__len__()} checks")
 
     def _finish(self, score, verdict, vcolor, total):
@@ -301,19 +271,13 @@ class App:
         self.btn.set_state("normal")
         self.count_lbl.config(text=f"{total} / {total} checks")
 
-
-# ─── HELPERS ────────────────────────────────────────────────────────────────
 def _sep_h(parent, color=BORDER, height=1):
     tk.Frame(parent, bg=color, height=height).pack(fill="x")
-
-
 def _rounded_border(widget):
     """Simulate a subtle border by configuring relief."""
     widget.config(relief="flat", bd=0,
                   highlightthickness=1, highlightbackground=BORDER,
                   highlightcolor=BORDER)
-
-
 class _FlatButton(tk.Label):
     """Hover-animated flat button built from a Label."""
 
@@ -351,8 +315,6 @@ class _FlatButton(tk.Label):
             self._on = False
             self.config(bg=self._nbg, fg=self._fg, cursor="hand2")
 
-
-# ─── RUN ────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     root = tk.Tk()
     app = App(root)
