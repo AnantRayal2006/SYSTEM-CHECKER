@@ -19,7 +19,7 @@ A Python-based GUI tool that scans Windows systems for potential security risks.
 * Multithreading
 
 ## 📸 Screenshot
-(![App Screenshot](Screenshot%202026-04-02%20131608.png))
+![App Screenshot](Screenshot%202026-04-02%20131608.png)
 
 ## ▶️ How to Run
 
